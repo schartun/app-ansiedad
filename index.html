@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Calma</title>
+    <!-- Importando fuente redondeada y amigable de Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* Diseño general y paleta de colores */
+        body {
+            margin: 0;
+            padding: 0;
+            /* Fondo con un degradado suave y relajante */
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            font-family: 'Nunito', sans-serif;
+            color: #2d3748;
+            min-height: 100vh;
+        }
+
+        /* Contenedor principal que simula la pantalla de un celular */
+        .app-contenedor {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        h1 { 
+            margin-top: 0; 
+            font-weight: 800; 
+            color: #4a5568;
+            font-size: 2.2rem;
+            letter-spacing: -0.5px;
+        }
+
+        /* Tarjetas Base (Estilo Glassmorphism suave) */
+        .tarjeta {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+            margin-bottom: 25px;
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .tarjeta h2 {
+            font-size: 1.3rem;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-weight: 800;
+            color: #4a5568;
+            text-align: center;
+        }
+
+        /* Botón de Info */
+        .btn-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #edf2f7;
+            color: #a0aec0;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .btn-info:hover { background: #cbd5e1; color: #475569; }
+        
+        .texto-info {
+            display: none;
+            background-color: #f1f5f9;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            text-align: left;
+            margin-bottom: 20px;
+            color: #475569;
+            border-left: 4px solid #82c0cc;
+            line-height: 1.5;
+        }
+
+        /* Respiración */
+        #circulo-respiracion {
+            width: 160px;
+            height: 160px;
+            background: linear-gradient(135deg, #82c0cc, #489fb5);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 26px;
+            font-weight: 800;
+            transition: all 4s ease-in-out;
+            box-shadow: 0 15px 35px rgba(72, 159, 181, 0.4);
+            margin: 50px auto 90px auto;
+        }
+        .expandir { 
+            transform: scale(1.7); 
+            box-shadow: 0 25px 50px rgba(72, 159, 181, 0.6);
+        }
+
+        /* Botones de Acción Generales */
+        .btn-accion {
+            background-color: #82c0cc;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Nunito', sans-serif;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .btn-accion:hover { background-color: #489fb5; transform: translateY(-2px); }
+
+        #btn-sos {
+            background: linear-gradient(135deg, #ffb4a2, #e5989b);
+            color: white;
+            border-radius: 30px;
+            padding: 18px 30px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 20px rgba(229, 152, 155, 0.4);
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        #btn-sos:hover { transform: scale(1.02); box-shadow: 0 15px 25px rgba(229, 152, 155, 0.5); }
+
+        /* Emociones */
+        .contenedor-emojis { display: flex; gap: 10px; justify-content: space-between; padding: 0 10px;}
+        .btn-emoji { 
+            font-size: 2.8rem; 
+            background: none; 
+            border: none; 
+            cursor: pointer; 
+            opacity: 0.5; 
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Animación de rebote suave */
+            padding: 0;
+        }
+        .btn-emoji:hover { transform: scale(1.1); opacity: 0.8; }
+        .btn-emoji.seleccionado { transform: scale(1.25); opacity: 1; filter: drop-shadow(0px 8px 10px rgba(0,0,0,0.15)); }
+        
+        #mensaje-validacion { 
+            margin-top: 25px; 
+            font-size: 1.05rem; 
+            color: #489fb5; 
+            font-weight: 800; 
+            min-height: 24px; 
+            text-align: center;
+        }
+
+        /* Técnica Anclaje */
+        #texto-paso {
+            font-weight: 600; 
+            color: #2c3e50; 
+            font-size: 1.1rem;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin: 15px 0;
+        }
+        
+        #p-anclaje { text-align: center; color: #718096; margin-bottom: 20px; }
+
+        /* Historial */
+        #lista-historial {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 0;
+        }
+        #lista-historial li {
+            padding: 12px 5px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+        #lista-historial li:last-child { border-bottom: none; }
+        #lista-historial li span.fecha { color: #a0aec0; font-size: 0.85rem; font-weight: 400; margin-left: auto; }
+        
+        .btn-borrar {
+            background-color: transparent;
+            color: #a0aec0;
+            border: 1px solid #cbd5e1;
+            margin-top: 20px;
+        }
+        .btn-borrar:hover { background-color: #f1f5f9; color: #e53e3e; border-color: #e53e3e; }
+    </style>
+</head>
+<body>
+
+    <div class="app-contenedor">
+        <h1>Respira conmigo</h1>
+        
+        <button class="btn-info" onclick="toggleInfo('info-respiracion')" style="position: absolute; top: 20px; right: 20px;" title="¿Por qué funciona esto?">i</button>
+        <div id="info-respiracion" class="texto-info">
+            <strong>¿Por qué funciona?</strong> Respirar profundamente activa el sistema nervioso parasimpático (el freno del cuerpo). Al hacer exhalaciones largas, le envías una señal física a tu cerebro de que estás a salvo, reduciendo tu ritmo cardíaco y deteniendo la respuesta de pánico.
+        </div>
+
+        <div id="circulo-respiracion">Inhala</div>
+
+        <button id="btn-sos">🎵 Sonido Relajante</button>
+        <audio id="audio-sos" src="https://cdn.pixabay.com/download/audio/2021/08/09/audio_7314271891.mp3?filename=rain-and-birds-nature-sounds-8079.mp3" preload="auto"></audio>
+
+        <!-- Tarjeta Emociones -->
+        <div class="tarjeta">
+            <button class="btn-info" onclick="toggleInfo('info-emociones')" title="¿Por qué funciona esto?">i</button>
+            <h2>¿Cómo te sientes ahora?</h2>
+            
+            <div id="info-emociones" class="texto-info">
+                <strong>¿Por qué funciona?</strong> "Nombrarlo para domarlo". Identificar y etiquetar tu emoción transfiere la energía de tu cerebro desde la zona del pánico (amígdala) hacia la zona de la lógica (corteza prefrontal), disminuyendo la intensidad de la ansiedad.
+            </div>
+
+            <div class="contenedor-emojis">
+                <button class="btn-emoji" onclick="seleccionarEmocion('Ansioso', '😰', this)">😰</button>
+                <button class="btn-emoji" onclick="seleccionarEmocion('Abrumado', '😵‍💫', this)">😵‍💫</button>
+                <button class="btn-emoji" onclick="seleccionarEmocion('Triste', '😔', this)">😔</button>
+                <button class="btn-emoji" onclick="seleccionarEmocion('Tranquilo', '😌', this)">😌</button>
+            </div>
+            <p id="mensaje-validacion"></p>
+        </div>
+
+        <!-- Tarjeta Anclaje -->
+        <div class="tarjeta">
+            <button class="btn-info" onclick="toggleInfo('info-anclaje')" title="¿Por qué funciona esto?">i</button>
+            <h2>Técnica de Anclaje</h2>
+            
+            <div id="info-anclaje" class="texto-info">
+                <strong>¿Por qué funciona?</strong> La ansiedad te atrapa en pensamientos catastróficos. Identificar estímulos físicos fuerza a tu cerebro a salir de la rumiación y procesar la realidad concreta del presente, cortando el bucle de alerta.
+            </div>
+            
+            <p id="p-anclaje">Conecta con tu entorno físico.</p>
+            <button id="btn-iniciar-anclaje" class="btn-accion" onclick="iniciarAnclaje()">Comenzar (5-4-3-2-1)</button>
+            <div id="pasos-anclaje" style="display: none;">
+                <p id="texto-paso"></p>
+                <button id="btn-siguiente-paso" class="btn-accion" onclick="siguientePaso()">Siguiente</button>
+            </div>
+        </div>
+        <!-- Tarjeta Historial -->
+        <div class="tarjeta">
+            <h2>Tu Historial Reciente</h2>
+            
+            <p style="font-size: 0.85rem; color: #718096; text-align: center; margin-top: -10px; margin-bottom: 15px; background: #f8fafc; padding: 8px; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                🔒 <strong>100% Privado:</strong> Tus registros son anónimos y se guardan únicamente en la memoria de este dispositivo.
+            </p>
+
+            <!-- NUEVO: Botón para desplegar -->
+            <button id="btn-toggle-historial" class="btn-accion" style="background-color: #edf2f7; color: #4a5568; margin-bottom: 10px;" onclick="toggleHistorial()">Ver últimos 15 registros ▼</button>
+            
+            <!-- NUEVO: Contenedor oculto por defecto -->
+            <div id="contenedor-historial" style="display: none;">
+                <ul id="lista-historial" style="max-height: 250px;"></ul>
+                <button class="btn-accion btn-borrar" onclick="limpiarHistorial()">Borrar Datos</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleInfo(id) {
+            const elemento = document.getElementById(id);
+            elemento.style.display = elemento.style.display === 'block' ? 'none' : 'block';
+        }
+
+        const circulo = document.getElementById('circulo-respiracion');
+        function cicloRespiracion() {
+            circulo.textContent = 'Inhala';
+            circulo.classList.add('expandir');
+            setTimeout(() => {
+                circulo.textContent = 'Exhala';
+                circulo.classList.remove('expandir');
+            }, 4000);
+        }
+        cicloRespiracion();
+        setInterval(cicloRespiracion, 8000);
+
+        const btnSos = document.getElementById('btn-sos');
+        const audioSos = document.getElementById('audio-sos');
+        let reproduciendo = false;
+        btnSos.addEventListener('click', () => {
+            if (reproduciendo) { audioSos.pause(); btnSos.innerHTML = '🎵 Sonido Relajante'; } 
+            else { audioSos.play(); btnSos.innerHTML = '⏸ Pausar Sonido'; }
+            reproduciendo = !reproduciendo;
+        });
+
+        const pasosAnclajeArray = [
+            "👀 Busca 5 cosas que puedas VER",
+            "🖐️ Encuentra 4 cosas que puedas TOCAR",
+            "👂 Escucha 3 sonidos que puedas OÍR",
+            "👃 Identifica 2 cosas que puedas OLER",
+            "👅 Reconoce 1 cosa que puedas SABOREAR"
+        ];
+        let pasoActual = 0;
+        
+        function iniciarAnclaje() {
+            document.getElementById('btn-iniciar-anclaje').style.display = 'none';
+            document.getElementById('p-anclaje').style.display = 'none';
+            document.getElementById('pasos-anclaje').style.display = 'block';
+            pasoActual = 0; mostrarPaso();
+        }
+        
+        function mostrarPaso() {
+            document.getElementById('texto-paso').textContent = pasosAnclajeArray[pasoActual];
+            document.getElementById('btn-siguiente-paso').textContent = pasoActual === 4 ? "Finalizar" : "Siguiente Paso";
+        }
+        
+        function siguientePaso() {
+            if (pasoActual < 4) { pasoActual++; mostrarPaso(); } 
+            else {
+                document.getElementById('pasos-anclaje').style.display = 'none';
+                document.getElementById('btn-iniciar-anclaje').style.display = 'block';
+                document.getElementById('p-anclaje').style.display = 'block';
+                document.getElementById('btn-iniciar-anclaje').textContent = "Repetir Ejercicio";
+            }
+        }
+
+
+        function toggleHistorial() {
+            const contenedor = document.getElementById('contenedor-historial');
+            const btn = document.getElementById('btn-toggle-historial');
+            if (contenedor.style.display === 'none') {
+                contenedor.style.display = 'block';
+                btn.textContent = 'Ocultar historial ▲';
+            } else {
+                contenedor.style.display = 'none';
+                btn.textContent = 'Ver últimos 15 registros ▼';
+            }
+        }
+
+        function cargarHistorial() {
+            const lista = document.getElementById('lista-historial');
+            lista.innerHTML = '';
+            const datos = JSON.parse(localStorage.getItem('appCalmaHistorial')) || [];
+            
+            if(datos.length === 0) {
+                lista.innerHTML = '<li style="color: #a0aec0; justify-content: center;">Aún no hay registros.</li>';
+                return;
+            }
+
+            datos.forEach(registro => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span style="font-size:1.5rem">${registro.emoji}</span> ${registro.emocion} <span class="fecha">${registro.fecha}</span>`;
+                lista.appendChild(li);
+            });
+        }
+
+        function seleccionarEmocion(emocion, emoji, botonClicado) {
+            document.querySelectorAll('.btn-emoji').forEach(btn => btn.classList.remove('seleccionado'));
+            botonClicado.classList.add('seleccionado');
+
+            const mensaje = document.getElementById('mensaje-validacion');
+            if (emocion === 'Ansioso' || emocion === 'Abrumado') mensaje.textContent = `Es normal sentirse ${emocion.toLowerCase()}. Sigue respirando.`;
+            else if (emocion === 'Triste') mensaje.textContent = "Reconocer tu tristeza es un gran paso.";
+            else mensaje.textContent = "Disfruta este momento de tranquilidad.";
+
+            const nuevoRegistro = {
+                emocion: emocion,
+                emoji: emoji,
+                fecha: new Date().toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })
+            };
+            
+            const datosGuardados = JSON.parse(localStorage.getItem('appCalmaHistorial')) || [];
+            datosGuardados.unshift(nuevoRegistro);
+            if(datosGuardados.length > 15) datosGuardados.pop();
+            
+            localStorage.setItem('appCalmaHistorial', JSON.stringify(datosGuardados));
+            cargarHistorial();
+        }
+
+        function limpiarHistorial() {
+            if(confirm("¿Seguro que quieres borrar tu historial?")) {
+                localStorage.removeItem('appCalmaHistorial');
+                cargarHistorial();
+                document.getElementById('mensaje-validacion').textContent = '';
+                document.querySelectorAll('.btn-emoji').forEach(btn => btn.classList.remove('seleccionado'));
+            }
+        }
+
+        cargarHistorial();
+    </script>
+</body>
+</html>
